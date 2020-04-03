@@ -4,26 +4,18 @@
    This file is part of the JUCE library.
    Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -84,7 +76,7 @@ struct BlockConfigManager
     static constexpr const char* midiSettingsGroup = "MIDI Settings";
     static constexpr const char* pitchGroup = "Pitch";
     static constexpr const char* playGroup = "Play mode";
-    static constexpr const char* touchGroup = "5D Touch";
+    static constexpr const char* sensitivityGroup = "Sensitivity";
     static constexpr const char* rhythmGroup = "Rhythm";
     static constexpr const char* coloursGroup = "Colors";
 
@@ -105,13 +97,13 @@ struct BlockConfigManager
         { slideMode,            0,      0,      2,          false,  "Slide Mode",           ConfigType::options,    { "Absolute",
                                                                                                                   "Relative Unipolar",
                                                                                                                   "Relative Bipolar" }, playGroup },
-        { velocitySensitivity,  100,    0,      127,        false,  "Strike Sensitivity",   ConfigType::integer,    {},               touchGroup },
-        { glideSensitivity,     100,    0,      127,        false,  "Glide Sensitivity",    ConfigType::integer,    {},               touchGroup },
-        { slideSensitivity,     100,    0,      127,        false,  "Slide Sensitivity",    ConfigType::integer,    {},               touchGroup },
-        { pressureSensitivity,  100,    0,      127,        false,  "Pressure Sensitivity", ConfigType::integer,    {},               touchGroup },
-        { liftSensitivity,      100,    0,      127,        false,  "Lift Sensitivity",     ConfigType::integer,    {},               touchGroup },
-        { fixedVelocity,        0,      0,      1,          false,  "Fixed Velocity",       ConfigType::boolean,    {},               touchGroup },
-        { fixedVelocityValue,   127,    1,      127,        false,  "Fixed Velocity Value", ConfigType::integer,    {},               touchGroup },
+        { velocitySensitivity,  100,    0,      127,        false,  "Strike Sensitivity",   ConfigType::integer,    {},               sensitivityGroup },
+        { glideSensitivity,     100,    0,      127,        false,  "Glide Sensitivity",    ConfigType::integer,    {},               sensitivityGroup },
+        { slideSensitivity,     100,    0,      127,        false,  "Slide Sensitivity",    ConfigType::integer,    {},               sensitivityGroup },
+        { pressureSensitivity,  100,    0,      127,        false,  "Pressure Sensitivity", ConfigType::integer,    {},               sensitivityGroup },
+        { liftSensitivity,      100,    0,      127,        false,  "Lift Sensitivity",     ConfigType::integer,    {},               sensitivityGroup },
+        { fixedVelocity,        0,      0,      1,          false,  "Fixed Velocity",       ConfigType::boolean,    {},               sensitivityGroup },
+        { fixedVelocityValue,   127,    1,      127,        false,  "Fixed Velocity Value", ConfigType::integer,    {},               sensitivityGroup },
         { pianoMode,            0,      0,      1,          false,  "Piano Mode",           ConfigType::boolean,    {},               playGroup },
         { glideLock,            0,      0,      127,        false,  "Glide Rate",           ConfigType::integer,    {},               playGroup },
         { glideLockEnable,      0,      0,      1,          false,  "Glide Lock Enable",    ConfigType::boolean,    {},               playGroup },
@@ -279,7 +271,7 @@ struct BlockConfigManager
         if (getIndexForItem (item, itemIndex))
             return configList[itemIndex].toConfigMetaData();
 
-        return {};
+        return { static_cast<juce::uint32> (item) };
     }
 
     void resetConfigListActiveStatus()

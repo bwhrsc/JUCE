@@ -52,8 +52,12 @@ AudioProcessor::AudioProcessor (const BusesProperties& ioConfig)
 
 AudioProcessor::~AudioProcessor()
 {
-    // ooh, nasty - the editor should have been deleted before its AudioProcessor.
-    jassert (activeEditor == nullptr);
+    {
+        const ScopedLock sl (activeEditorLock);
+
+        // ooh, nasty - the editor should have been deleted before its AudioProcessor.
+        jassert (activeEditor == nullptr);
+    }
 
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     // This will fail if you've called beginParameterChangeGesture() for one
@@ -360,6 +364,7 @@ void AudioProcessor::setPlayConfigDetails (int newNumIns, int newNumOuts, double
     jassert (success && newNumIns == getTotalNumInputChannels() && newNumOuts == getTotalNumOutputChannels());
 
     setRateAndBufferSizeDetails (newSampleRate, newBlockSize);
+    ignoreUnused (success);
 }
 
 void AudioProcessor::setRateAndBufferSizeDetails (double newSampleRate, int newBlockSize) noexcept
@@ -424,41 +429,18 @@ void AudioProcessor::updateHostDisplay()
             l->audioProcessorChanged (this);
 }
 
-#if JUCE_DEBUG
-void AudioProcessor::checkDuplicateParamIDs()
+void AudioProcessor::checkForDuplicateParamID (AudioProcessorParameter* param)
 {
-    duplicateParamIDCheck.reset();
+    ignoreUnused (param);
 
-    StringArray usedIDs;
-    usedIDs.ensureStorageAllocated (flatParameterList.size());
-
-    for (auto& p : flatParameterList)
-        if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (p))
-            usedIDs.add (withID->paramID);
-
-    usedIDs.sort (false);
-
-    // This assertion checks whether you attempted to add two or more parameters with the same ID
-    for (int i = 1; i < usedIDs.size(); ++i)
-        jassert (usedIDs[i - 1] != usedIDs[i]);
-}
-
-struct AudioProcessor::DuplicateParamIDCheck  : private AsyncUpdater
-{
-    DuplicateParamIDCheck (AudioProcessor& p) : owner (p)   { triggerAsyncUpdate(); }
-    ~DuplicateParamIDCheck() override                       { cancelPendingUpdate(); }
-
-    void handleAsyncUpdate() override                       { owner.checkDuplicateParamIDs(); }
-
-    AudioProcessor& owner;
-};
-#endif
-
-void AudioProcessor::triggerDuplicateParamIDCheck()
-{
    #if JUCE_DEBUG
-    if (MessageManager::getInstanceWithoutCreating() != nullptr && duplicateParamIDCheck == nullptr)
-        duplicateParamIDCheck = std::make_unique<DuplicateParamIDCheck> (*this);
+    if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (param))
+    {
+        auto insertResult = paramIDs.insert (withID->paramID);
+
+        // If you hit this assertion then the parameter ID is not unique
+        jassert (insertResult.second);
+    }
    #endif
 }
 
@@ -474,7 +456,7 @@ void AudioProcessor::addParameter (AudioProcessorParameter* param)
     param->parameterIndex = flatParameterList.size();
     flatParameterList.add (param);
 
-    triggerDuplicateParamIDCheck();
+    checkForDuplicateParamID (param);
 }
 
 void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
@@ -489,14 +471,19 @@ void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterG
         auto p = flatParameterList.getUnchecked (i);
         p->processor = this;
         p->parameterIndex = i;
+
+        checkForDuplicateParamID (p);
     }
 
     parameterTree.addChild (std::move (group));
-    triggerDuplicateParamIDCheck();
 }
 
 void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
 {
+   #if JUCE_DEBUG
+    paramIDs.clear();
+   #endif
+
     parameterTree = std::move (newTree);
     flatParameterList = parameterTree.getParameters (true);
 
@@ -505,9 +492,9 @@ void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
         auto p = flatParameterList.getUnchecked (i);
         p->processor = this;
         p->parameterIndex = i;
-    }
 
-    triggerDuplicateParamIDCheck();
+        checkForDuplicateParamID (p);
+    }
 }
 
 void AudioProcessor::refreshParameterList() {}
@@ -821,14 +808,22 @@ void AudioProcessor::audioIOChanged (bool busNumberChanged, bool channelNumChang
 //==============================================================================
 void AudioProcessor::editorBeingDeleted (AudioProcessorEditor* const editor) noexcept
 {
-    const ScopedLock sl (callbackLock);
+    const ScopedLock sl (activeEditorLock);
 
     if (activeEditor == editor)
         activeEditor = nullptr;
 }
 
+AudioProcessorEditor* AudioProcessor::getActiveEditor() const noexcept
+{
+    const ScopedLock sl (activeEditorLock);
+    return activeEditor;
+}
+
 AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
 {
+    const ScopedLock sl (activeEditorLock);
+
     if (activeEditor != nullptr)
         return activeEditor;
 
@@ -838,8 +833,6 @@ AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
     {
         // you must give your editor comp a size before returning it..
         jassert (ed->getWidth() > 0 && ed->getHeight() > 0);
-
-        const ScopedLock sl (callbackLock);
         activeEditor = ed;
     }
 

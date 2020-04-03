@@ -1300,7 +1300,8 @@ float Component::getApproximateScaleFactorForComponent (Component* targetCompone
             transform = transform.scaled (target->getDesktopScaleFactor());
     }
 
-    return (transform.getScaleFactor() / Desktop::getInstance().getGlobalScaleFactor());
+    auto transformScale = std::sqrt (std::abs (transform.getDeterminant()));
+    return transformScale / Desktop::getInstance().getGlobalScaleFactor();
 }
 
 //==============================================================================
@@ -1844,6 +1845,9 @@ void Component::internalRepaintUnchecked (Rectangle<int> area, bool isEntireComp
             if (! (isEntireComponent ? cachedImage->invalidateAll()
                                      : cachedImage->invalidate (area)))
                 return;
+
+        if (area.isEmpty())
+            return;
 
         if (flags.hasHeavyweightPeerFlag)
         {

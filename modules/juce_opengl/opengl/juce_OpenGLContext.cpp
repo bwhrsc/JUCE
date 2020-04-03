@@ -66,6 +66,10 @@ private:
 
 #endif
 
+#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+ extern JUCE_API double getScaleFactorForWindow (HWND);
+#endif
+
 //==============================================================================
 class OpenGLContext::CachedImage  : public CachedComponentImage,
                                     private ThreadPoolJob
@@ -105,7 +109,7 @@ public:
         if (renderThread != nullptr)
         {
             // make sure everything has finished executing
-            destroying.set (1);
+            destroying = true;
 
             if (workQueue.size() > 0)
             {
@@ -141,6 +145,16 @@ public:
         if (renderThread != nullptr)
             renderThread->addJob (this, false);
     }
+
+   #if JUCE_MAC
+    static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
+                                         CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
+    {
+        auto* self = (CachedImage*) displayLinkContext;
+        self->renderFrame();
+        return kCVReturnSuccess;
+    }
+   #endif
 
     //==============================================================================
     void paint (Graphics&) override
@@ -214,7 +228,9 @@ public:
     bool renderFrame()
     {
         MessageManager::Lock::ScopedTryLockType mmLock (messageManagerLock, false);
-        const bool isUpdating = needsUpdate.compareAndSetBool (0, 1);
+
+        auto isUpdatingTestValue = true;
+        auto isUpdating = needsUpdate.compare_exchange_strong (isUpdatingTestValue, false);
 
         if (context.renderComponents && isUpdating)
         {
@@ -280,14 +296,16 @@ public:
     {
         if (auto* peer = component.getPeer())
         {
-           #if JUCE_WINDOWS
-            auto newScale = nativeContext->getWindowScaleFactor (component.getTopLevelComponent()->getScreenBounds());
-           #else
-            auto newScale = Desktop::getInstance().getDisplays().findDisplayForRect (component.getTopLevelComponent()->getScreenBounds()).scale;
-           #endif
-
             auto localBounds = component.getLocalBounds();
-            auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * newScale;
+            auto displayScale = Desktop::getInstance().getDisplays().findDisplayForRect (component.getTopLevelComponent()->getScreenBounds()).scale;
+
+            auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * displayScale;
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            auto newScale = getScaleFactorForWindow (nativeContext->getNativeHandle());
+           #else
+            auto newScale = displayScale;
+           #endif
 
             if (scale != newScale || viewportArea != newArea)
             {
@@ -464,10 +482,14 @@ public:
             if (shouldExit())
                 break;
 
+           #if JUCE_MAC
+            repaintEvent.wait (1000);
+           #else
             if (! renderFrame())
                 repaintEvent.wait (5); // failed to render, so avoid a tight fail-loop.
             else if (! context.continuousRepaint && ! shouldExit())
                 repaintEvent.wait (-1);
+           #endif
         }
 
         hasInitialised = false;
@@ -519,11 +541,22 @@ public:
         if (context.renderer != nullptr)
             context.renderer->newOpenGLContextCreated();
 
+       #if JUCE_MAC
+        CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
+        CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
+        CVDisplayLinkStart (displayLink);
+       #endif
+
         return true;
     }
 
     void shutdownOnThread()
     {
+       #if JUCE_MAC
+        CVDisplayLinkStop (displayLink);
+        CVDisplayLinkRelease (displayLink);
+       #endif
+
         if (context.renderer != nullptr)
             context.renderer->openGLContextClosing();
 
@@ -588,7 +621,7 @@ public:
 
     void execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool shouldBlock, bool calledFromDestructor = false)
     {
-        if (calledFromDestructor || destroying.get() == 0)
+        if (calledFromDestructor || ! destroying)
         {
             if (shouldBlock)
             {
@@ -646,10 +679,12 @@ public:
    #else
     bool shadersAvailable = false;
    #endif
-    bool hasInitialised = false;
-    Atomic<int> needsUpdate { 1 }, destroying;
+    std::atomic<bool> hasInitialised { false }, needsUpdate { true }, destroying { false };
     uint32 lastMMLockReleaseTime = 0;
 
+   #if JUCE_MAC
+    CVDisplayLinkRef displayLink;
+   #endif
     std::unique_ptr<ThreadPool> renderThread;
     ReferenceCountedArray<OpenGLContext::AsyncWorker, CriticalSection> workQueue;
     MessageManager::Lock messageManagerLock;

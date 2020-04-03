@@ -258,6 +258,11 @@ private:
                              "Night Mode"
                            },
                            BlockConfigManager::playGroup });
+
+        defaultConfig.add ({ zTrackingMode, 0, 0, 1, false,
+                            "Pressure Tracking Mode", ConfigType::options,
+                            { "Poly Aftertouch", "Channel Pressure" },
+                            BlockConfigManager::playGroup });
     }
 
     //==============================================================================
@@ -340,14 +345,16 @@ static const char* getButtonNameForFunction (ControlButton::ButtonFunction fn) n
         case BF::button6:       return "6";
         case BF::button7:       return "7";
 
-        case BF::velocitySensitivity:   return "Velocity Sensitivity";
-        case BF::glideSensitivity:      return "Glide Sensitivity";
-        case BF::slideSensitivity:      return "Slide Sensitivity";
-        case BF::pressSensitivity:      return "Press Sensitivity";
-        case BF::liftSensitivity:       return "Lift Sensitivity";
-        case BF::fixedVelocity: return "Fixed Velocity";
-        case BF::glideLock:     return "Glide Lock";
-        case BF::pianoMode:     return "Piano Mode";
+        case BF::velocitySensitivity:  return "Velocity Sensitivity";
+        case BF::glideSensitivity:     return "Glide Sensitivity";
+        case BF::slideSensitivity:     return "Slide Sensitivity";
+        case BF::pressSensitivity:     return "Press Sensitivity";
+        case BF::liftSensitivity:      return "Lift Sensitivity";
+        case BF::fixedVelocity:        return "Fixed Velocity";
+        case BF::glideLock:            return "Glide Lock";
+        case BF::pianoMode:            return "Piano Mode";
+
+        default:  break;
     }
 
     jassertfalse;

@@ -187,7 +187,9 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         deleteProjectTabs();
         project = newProject;
-        rebuildProjectTabs();
+
+        if (project != nullptr)
+            rebuildProjectTabs();
     }
 }
 
@@ -559,7 +561,7 @@ bool ProjectContentComponent::saveProject (bool shouldWait, bool openInIDE)
 void ProjectContentComponent::closeProject()
 {
     if (auto* mw = findParentComponentOfClass<MainWindow>())
-        mw->closeCurrentProject();
+        mw->closeCurrentProject (true);
 }
 
 void ProjectContentComponent::showProjectSettings()
