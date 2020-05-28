@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../../juce_core/system/juce_TargetPlatform.h"
+#include <juce_core/system/juce_TargetPlatform.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_VST
@@ -130,8 +130,8 @@ using namespace juce;
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
 
-#include "../../juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp"
-#include "../../juce_audio_processors/format_types/juce_VSTCommon.h"
+#include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
+#include <juce_audio_processors/format_types/juce_VSTCommon.h>
 
 #if JUCE_BIG_ENDIAN
  #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (a | (((uint32) b) << 8) | (((uint32) c) << 16) | (((uint32) d) << 24))
@@ -1092,10 +1092,6 @@ public:
            #endif
 
             ignoreUnused (fakeMouseGenerator);
-
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            startTimer (500);
-           #endif
         }
 
         ~EditorCompWrapper() override
@@ -1120,6 +1116,11 @@ public:
            #if JUCE_WINDOWS
             addToDesktop (0, args.ptr);
             hostWindow = (HWND) args.ptr;
+
+            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+             checkHostWindowScaleFactor();
+             startTimer (500);
+            #endif
            #elif JUCE_LINUX
             addToDesktop (0, args.ptr);
             hostWindow = (Window) args.ptr;
@@ -1161,23 +1162,21 @@ public:
 
         void resized() override
         {
+            auto newBounds = getLocalBounds();
+
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.1))
+                return;
+
+            lastBounds = newBounds;
+           #endif
+
             if (auto* ed = getEditorComp())
             {
                 ed->setTopLeftPosition (0, 0);
 
                 if (shouldResizeEditor)
-                {
-                    auto newBounds = getLocalBounds();
-
-                   #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                    if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.1))
-                        return;
-
-                    lastBounds = newBounds;
-                   #endif
-
                     ed->setBounds (ed->getLocalArea (this, newBounds));
-                }
 
                 updateWindowSize (false);
             }
@@ -1186,6 +1185,11 @@ public:
             if (! wrapper.useNSView)
                 updateEditorCompBoundsVST (this);
            #endif
+        }
+
+        void parentSizeChanged() override
+        {
+            updateWindowSize (true);
         }
 
         void childBoundsChanged (Component*) override
@@ -1342,12 +1346,17 @@ public:
         }
 
        #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        void timerCallback() override
+        void checkHostWindowScaleFactor()
         {
             auto hostWindowScale = (float) getScaleFactorForWindow (hostWindow);
 
             if (hostWindowScale > 0.0f && ! approximatelyEqual (hostWindowScale, editorScaleFactor))
                 wrapper.handleSetContentScaleFactor (hostWindowScale);
+        }
+
+        void timerCallback() override
+        {
+            checkHostWindowScaleFactor();
         }
        #endif
 
