@@ -240,6 +240,14 @@ public:
         will move the viewport.
     */
     void setSingleStepSizes (int stepX, int stepY);
+    
+    /** Changes whether the viewport responds inversely to a mousewheel event. */
+    void setScrollShouldBeReversed (bool scrollShouldBeReversed);
+    
+    /** Returns the direction the viewport should scroll in relative to the MouseWheelDetails
+        @see setScrollShouldBeReversed
+     */
+    bool getScrollShouldBeReversed()                            { return scrollIsReversed; }
 
     /** Returns a pointer to the scrollbar component being used.
         Handy if you need to customise the bar somehow.
@@ -315,6 +323,7 @@ private:
     int singleStepX = 16, singleStepY = 16;
     bool showHScrollbar = true, showVScrollbar = true, deleteContent = true;
     bool customScrollBarThickness = false;
+    bool scrollIsReversed = false;
     bool allowScrollingWithoutScrollbarV = false, allowScrollingWithoutScrollbarH = false;
     bool vScrollbarRight = true, hScrollbarBottom = true;
 
