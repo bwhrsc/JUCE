@@ -113,6 +113,12 @@ public:
         This is the value that was set with setMidiChannelsToDisplay().
     */
     int getMidiChannelsToDisplay() const noexcept                   { return midiInChannelMask; }
+    
+    /** If it isn't already a listener, registers the keyboard as a listener of the midi keyboard state. */
+    void startListeningToMidiKeyboardState();
+    
+    /** Deregisters the keyboard as a listener of the midi keyboard state. */
+    void stopListeningToMidiKeyboardState();
 
     //==============================================================================
     /** Changes the width used to draw the white keys. */
