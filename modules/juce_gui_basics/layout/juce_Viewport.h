@@ -7,12 +7,11 @@
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   22nd April 2020).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -248,6 +247,14 @@ public:
         will move the viewport.
     */
     void setSingleStepSizes (int stepX, int stepY);
+    
+    /** Changes whether the viewport responds inversely to a mousewheel event. */
+    void setScrollShouldBeReversed (bool scrollShouldBeReversed);
+    
+    /** Returns the direction the viewport should scroll in relative to the MouseWheelDetails
+        @see setScrollShouldBeReversed
+     */
+    bool getScrollShouldBeReversed()                            { return scrollIsReversed; }
 
     /** Returns a pointer to the scrollbar component being used.
         Handy if you need to customise the bar somehow.
@@ -323,6 +330,7 @@ private:
     int singleStepX = 16, singleStepY = 16;
     bool showHScrollbar = true, showVScrollbar = true, deleteContent = true;
     bool customScrollBarThickness = false;
+    bool scrollIsReversed = false;
     bool allowScrollingWithoutScrollbarV = false, allowScrollingWithoutScrollbarH = false;
     bool vScrollbarRight = true, hScrollbarBottom = true;
 
