@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -986,7 +993,7 @@ public:
     void paint (Graphics& g) override
     {
         g.setColour (findColour (TreeView::dragAndDropIndicatorColourId, true));
-        g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 2.0f);
+        g.drawRoundedRectangle (1.0f, 1.0f, (float) getWidth() - 2.0f, (float) getHeight() - 2.0f, 3.0f, 2.0f);
     }
 
 private:
@@ -1545,13 +1552,13 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         }
     }
 
-    auto halfH = itemHeight * 0.5f;
+    auto halfH = (float) itemHeight * 0.5f;
     auto indentWidth = ownerView->getIndentSize();
     auto depth = TreeViewHelpers::calculateDepth (this, ownerView->rootItemVisible);
 
     if (depth >= 0 && ownerView->openCloseButtonsVisible)
     {
-        auto x = (depth + 0.5f) * indentWidth;
+        auto x = ((float) depth + 0.5f) * (float) indentWidth;
 
         const bool parentLinesDrawn = parentItem != nullptr && parentItem->areLinesDrawn();
 
@@ -1559,7 +1566,7 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
             paintVerticalConnectingLine (g, Line<float> (x, 0, x, isLastOfSiblings() ? halfH : (float) itemHeight));
 
         if (parentLinesDrawn || (parentItem == nullptr && areLinesDrawn()))
-            paintHorizontalConnectingLine (g, Line<float> (x, halfH, x + indentWidth / 2, halfH));
+            paintHorizontalConnectingLine (g, Line<float> (x, halfH, x + (float) indentWidth * 0.5f, halfH));
 
         {
             auto* p = parentItem;

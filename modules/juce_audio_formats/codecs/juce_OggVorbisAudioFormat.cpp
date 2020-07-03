@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -39,7 +46,8 @@ namespace OggVorbisNamespace
                                       "-Wzero-as-null-pointer-constant",
                                       "-Wsign-conversion",
                                       "-Wswitch-default",
-                                      "-Wredundant-decls")
+                                      "-Wredundant-decls",
+                                      "-Wmisleading-indentation")
 
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
@@ -127,7 +135,7 @@ public:
             lengthInSamples = (uint32) ov_pcm_total (&ovFile, -1);
             numChannels = (unsigned int) info->channels;
             bitsPerSample = 16;
-            sampleRate = info->rate;
+            sampleRate = (double) info->rate;
 
             reservoir.setSize ((int) numChannels, (int) jmin (lengthInSamples, (int64) 4096));
         }
@@ -268,7 +276,7 @@ public:
         vorbis_info_init (&vi);
 
         if (vorbis_encode_init_vbr (&vi, (int) numChans, (int) rate,
-                                    jlimit (0.0f, 1.0f, qualityIndex * 0.1f)) == 0)
+                                    jlimit (0.0f, 1.0f, (float) qualityIndex * 0.1f)) == 0)
         {
             vorbis_comment_init (&vc);
 
@@ -475,8 +483,8 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
     {
         if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in.release(), true)))
         {
-            auto lengthSecs = r->lengthInSamples / r->sampleRate;
-            auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);
+            auto lengthSecs = (double) r->lengthInSamples / r->sampleRate;
+            auto approxBitsPerSecond = (int) ((double) source.getSize() * 8 / lengthSecs);
 
             auto qualities = getQualityOptions();
             int bestIndex = 0;

@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -342,10 +349,10 @@ public:
     template <typename FloatType>
     Rectangle operator*= (FloatType scaleFactor) noexcept
     {
-        Rectangle<FloatType> (pos.x * scaleFactor,
-                              pos.y * scaleFactor,
-                              w * scaleFactor,
-                              h * scaleFactor).copyWithRounding (*this);
+        Rectangle<FloatType> ((FloatType) pos.x * scaleFactor,
+                              (FloatType) pos.y * scaleFactor,
+                              (FloatType) w * scaleFactor,
+                              (FloatType) h * scaleFactor).copyWithRounding (*this);
         return *this;
     }
 
@@ -357,10 +364,10 @@ public:
     template <typename FloatType>
     Rectangle operator*= (Point<FloatType> scaleFactor) noexcept
     {
-        Rectangle<FloatType> (pos.x * scaleFactor.x,
-                              pos.y * scaleFactor.y,
-                              w * scaleFactor.x,
-                              h * scaleFactor.y).copyWithRounding (*this);
+        Rectangle<FloatType> ((FloatType) pos.x * scaleFactor.x,
+                              (FloatType) pos.y * scaleFactor.y,
+                              (FloatType) w * scaleFactor.x,
+                              (FloatType) h * scaleFactor.y).copyWithRounding (*this);
         return *this;
     }
 
@@ -377,10 +384,10 @@ public:
     template <typename FloatType>
     Rectangle operator/= (FloatType scaleFactor) noexcept
     {
-        Rectangle<FloatType> (pos.x / scaleFactor,
-                              pos.y / scaleFactor,
-                              w / scaleFactor,
-                              h / scaleFactor).copyWithRounding (*this);
+        Rectangle<FloatType> ((FloatType) pos.x / scaleFactor,
+                              (FloatType) pos.y / scaleFactor,
+                              (FloatType) w / scaleFactor,
+                              (FloatType) h / scaleFactor).copyWithRounding (*this);
         return *this;
     }
 
@@ -388,10 +395,10 @@ public:
     template <typename FloatType>
     Rectangle operator/= (Point<FloatType> scaleFactor) noexcept
     {
-        Rectangle<FloatType> (pos.x / scaleFactor.x,
-                              pos.y / scaleFactor.y,
-                              w / scaleFactor.x,
-                              h / scaleFactor.y).copyWithRounding (*this);
+        Rectangle<FloatType> ((FloatType) pos.x / scaleFactor.x,
+                              (FloatType) pos.y / scaleFactor.y,
+                              (FloatType) w / scaleFactor.x,
+                              (FloatType) h / scaleFactor.y).copyWithRounding (*this);
         return *this;
     }
 
@@ -545,22 +552,22 @@ public:
     template <typename FloatType>
     Point<ValueType> getRelativePoint (FloatType relativeX, FloatType relativeY) const noexcept
     {
-        return { pos.x + static_cast<ValueType> (w * relativeX),
-                 pos.y + static_cast<ValueType> (h * relativeY) };
+        return { pos.x + static_cast<ValueType> ((FloatType) w * relativeX),
+                 pos.y + static_cast<ValueType> ((FloatType) h * relativeY) };
     }
 
     /** Returns a proportion of the width of this rectangle. */
     template <typename FloatType>
     ValueType proportionOfWidth (FloatType proportion) const noexcept
     {
-        return static_cast<ValueType> (w * proportion);
+        return static_cast<ValueType> ((FloatType) w * proportion);
     }
 
     /** Returns a proportion of the height of this rectangle. */
     template <typename FloatType>
     ValueType proportionOfHeight (FloatType proportion) const noexcept
     {
-        return static_cast<ValueType> (h * proportion);
+        return static_cast<ValueType> ((FloatType) h * proportion);
     }
 
     /** Returns a rectangle based on some proportional coordinates relative to this one.

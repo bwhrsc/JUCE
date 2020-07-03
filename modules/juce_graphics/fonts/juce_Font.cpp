@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -629,7 +636,7 @@ float Font::getStringWidthFloat (const String& text) const
     auto w = getTypeface()->getStringWidth (text);
 
     if (font->kerning != 0.0f)
-        w += font->kerning * text.length();
+        w += font->kerning * (float) text.length();
 
     return w * font->height * font->horizontalScale;
 }
@@ -650,7 +657,7 @@ void Font::getGlyphPositions (const String& text, Array<int>& glyphs, Array<floa
         if (font->kerning != 0.0f)
         {
             for (int i = 0; i < num; ++i)
-                x[i] = (x[i] + i * font->kerning) * scale;
+                x[i] = (x[i] + (float) i * font->kerning) * scale;
         }
         else
         {

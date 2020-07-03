@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -194,7 +201,7 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
     auto hh = newBounds.getHeight() / 2;
     auto hwReduced = (float) (hw - borderSpace * 2);
     auto hhReduced = (float) (hh - borderSpace * 2);
-    auto arrowIndent = borderSpace - arrowSize;
+    auto arrowIndent = (float) borderSpace - arrowSize;
 
     Point<float> targets[4] = { { (float) targetArea.getCentreX(), (float) targetArea.getBottom() },
                                 { (float) targetArea.getRight(),   (float) targetArea.getCentreY() },
@@ -227,8 +234,8 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
             nearest = distanceFromCentre;
             targetPoint = targets[i];
 
-            newBounds.setPosition ((int) (centre.x - hw),
-                                   (int) (centre.y - hh));
+            newBounds.setPosition ((int) (centre.x - (float) hw),
+                                   (int) (centre.y - (float) hh));
         }
     }
 

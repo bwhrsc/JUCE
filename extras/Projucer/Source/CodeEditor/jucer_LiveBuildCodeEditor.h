@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -143,7 +150,7 @@ private:
                 const auto charArea = codeEditor->getCharacterBounds (startPosition);
                 const int height = charArea.getHeight() + 8;
 
-                Font f (height * 0.7f);
+                Font f ((float) height * 0.7f);
 
                 const int width = jmin (height * 2 + f.getStringWidth (launchButton.getName()),
                                         jmax (120, codeEditor->proportionOfWidth (0.2f)));
@@ -184,7 +191,7 @@ private:
                    .draw (g, r.removeFromLeft (getHeight()).toFloat(), false);
 
                 g.setColour (Colours::white);
-                g.setFont (getHeight() * 0.7f);
+                g.setFont ((float) getHeight() * 0.7f);
                 g.drawFittedText (getName(), r, Justification::centredLeft, 1);
             }
 
@@ -317,9 +324,9 @@ private:
             g.fillRect (getLocalBounds().withTrimmedBottom (lineOffset));
 
             Path path;
-            const float bottomY = getHeight() - (lineOffset / 2.0f);
+            const float bottomY = (float) getHeight() - ((float) lineOffset / 2.0f);
             path.addTriangle ((float) arrowXMin, bottomY,
-                              (arrowXMax + arrowXMin) / 2.0f, (float) lineOffset,
+                              (float) (arrowXMax + arrowXMin) / 2.0f, (float) lineOffset,
                               (float) arrowXMax, bottomY);
 
             g.setColour (diagColour.withAlpha (0.8f));

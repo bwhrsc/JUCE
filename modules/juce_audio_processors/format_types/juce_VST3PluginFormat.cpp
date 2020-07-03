@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -1352,13 +1359,13 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
             if (wasResized && view->canResize() == kResultTrue)
             {
-                rect.right  = (Steinberg::int32) roundToInt (getWidth()  * nativeScaleFactor);
-                rect.bottom = (Steinberg::int32) roundToInt (getHeight() * nativeScaleFactor);
+                rect.right  = (Steinberg::int32) roundToInt ((float) getWidth()  * nativeScaleFactor);
+                rect.bottom = (Steinberg::int32) roundToInt ((float) getHeight() * nativeScaleFactor);
 
                 view->checkSizeConstraint (&rect);
 
-                auto w = roundToInt (rect.getWidth()  / nativeScaleFactor);
-                auto h = roundToInt (rect.getHeight() / nativeScaleFactor);
+                auto w = roundToInt ((float) rect.getWidth()  / nativeScaleFactor);
+                auto h = roundToInt ((float) rect.getHeight() / nativeScaleFactor);
 
                 setSize (w, h);
 
@@ -1452,10 +1459,10 @@ private:
     //==============================================================================
     static void resizeWithRect (Component& comp, const ViewRect& rect, float scaleFactor)
     {
-        comp.setBounds (roundToInt (rect.left / scaleFactor),
-                        roundToInt (rect.top  / scaleFactor),
-                        jmax (10, std::abs (roundToInt (rect.getWidth()  / scaleFactor))),
-                        jmax (10, std::abs (roundToInt (rect.getHeight() / scaleFactor))));
+        comp.setBounds (roundToInt ((float) rect.left / scaleFactor),
+                        roundToInt ((float) rect.top  / scaleFactor),
+                        jmax (10, std::abs (roundToInt ((float) rect.getWidth()  / scaleFactor))),
+                        jmax (10, std::abs (roundToInt ((float) rect.getHeight() / scaleFactor))));
     }
 
     void attachPluginWindow()
@@ -2068,6 +2075,8 @@ public:
 
         setLatencySamples (jmax (0, (int) processor->getLatencySamples()));
         cachedBusLayouts = getBusesLayout();
+
+        setStateForAllMidiBuses (true);
 
         warnOnFailure (holder->component->setActive (true));
         warnOnFailureIfImplemented (processor->setProcessing (true));

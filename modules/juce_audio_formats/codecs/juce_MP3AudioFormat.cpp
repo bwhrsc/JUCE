@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -1961,8 +1968,8 @@ private:
             {
                 const uint8 n0 = si.allocation[i][0];
                 const uint8 n1 = si.allocation[i][1];
-                fraction[0][i] = n0 > 0 ? (float) ((-(1 << n0) + getBitsUint16 (n0 + 1) + 1) * constants.muls[n0 + 1][si.scaleFactor[i][0]]) : 0;
-                fraction[1][i] = n1 > 0 ? (float) ((-(1 << n1) + getBitsUint16 (n1 + 1) + 1) * constants.muls[n1 + 1][si.scaleFactor[i][1]]) : 0;
+                fraction[0][i] = n0 > 0 ? ((float) (-(1 << n0) + getBitsUint16 (n0 + 1) + 1) * constants.muls[n0 + 1][si.scaleFactor[i][0]]) : 0.0f;
+                fraction[1][i] = n1 > 0 ? ((float) (-(1 << n1) + getBitsUint16 (n1 + 1) + 1) * constants.muls[n1 + 1][si.scaleFactor[i][1]]) : 0.0f;
             }
 
             for (i = jsbound; i < 32; ++i)
@@ -1972,8 +1979,8 @@ private:
                 if (n > 0)
                 {
                     const uint32 w = ((uint32) -(1 << n) + getBitsUint16 (n + 1) + 1);
-                    fraction[0][i] = (float) (w * constants.muls[n + 1][si.scaleFactor[i][0]]);
-                    fraction[1][i] = (float) (w * constants.muls[n + 1][si.scaleFactor[i][1]]);
+                    fraction[0][i] = ((float) w * constants.muls[n + 1][si.scaleFactor[i][0]]);
+                    fraction[1][i] = ((float) w * constants.muls[n + 1][si.scaleFactor[i][1]]);
                 }
                 else
                     fraction[0][i] = fraction[1][i] = 0;
@@ -1987,7 +1994,7 @@ private:
                 const uint8 j = si.scaleFactor[i][0];
 
                 if (n > 0)
-                    fraction[0][i] = (float) ((-(1 << n) + getBitsUint16 (n + 1) + 1) * constants.muls[n + 1][j]);
+                    fraction[0][i] = ((float) (-(1 << n) + getBitsUint16 (n + 1) + 1) * constants.muls[n + 1][j]);
                 else
                     fraction[0][i] = 0;
             }
@@ -3106,7 +3113,7 @@ private:
                 const int bytesPerFrame = stream.frame.frameSize + 4;
 
                 if (bytesPerFrame == 417 || bytesPerFrame == 418)
-                    numFrames = roundToInt ((streamSize - streamStartPos) / 417.95918); // more accurate for 128k
+                    numFrames = roundToInt ((double) (streamSize - streamStartPos) / 417.95918); // more accurate for 128k
                 else
                     numFrames = (streamSize - streamStartPos) / bytesPerFrame;
             }

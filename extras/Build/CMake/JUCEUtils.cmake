@@ -1,12 +1,19 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE 6 technical preview.
+#  This file is part of the JUCE library.
 #  Copyright (c) 2020 - Raw Material Software Limited
 #
-#  You may use this code under the terms of the GPL v3
-#  (see www.gnu.org/licenses).
+#  JUCE is an open source library subject to commercial or open-source
+#  licensing.
 #
-#  For this technical preview, this file is not subject to commercial licensing.
+#  By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+#  Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+#
+#  End User License Agreement: www.juce.com/juce-6-licence
+#  Privacy Policy: www.juce.com/juce-privacy-policy
+#
+#  Or: You may also use this code under the terms of the GPL v3 (see
+#  www.gnu.org/licenses).
 #
 #  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
 #  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -21,7 +28,7 @@
 # Functions beginning with an underscore should be considered private and susceptible to
 # change, so don't call them directly.
 #
-# See the readme at `docs/CMake API.txt` for more information about CMake usage,
+# See the readme at `docs/CMake API.md` for more information about CMake usage,
 # including documentation of the public functions in this file.
 # ==================================================================================================
 
@@ -125,6 +132,8 @@ endif()
 
 set(JUCE_CMAKE_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR}
     CACHE INTERNAL "The path to the folder holding this file and other resources")
+
+include("${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake")
 
 # We set up default/fallback copy dirs here. If you need different copy dirs, use
 # set_directory_properties or set_target_properties to adjust the values of `JUCE_*_COPY_DIR` at
@@ -1588,7 +1597,7 @@ function(_juce_set_generic_property_if_not_set target property)
     set(existing_property)
     get_target_property(existing_property ${target} ${property})
 
-    if(${existing_property} STREQUAL "existing_property-NOTFOUND")
+    if(existing_property STREQUAL "existing_property-NOTFOUND")
         set_target_properties(${target} PROPERTIES ${property} "${ARGN}")
     endif()
 endfunction()

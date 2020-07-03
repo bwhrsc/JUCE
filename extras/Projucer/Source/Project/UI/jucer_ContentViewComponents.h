@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -53,7 +60,7 @@ public:
         for (auto s : columnHeaders)
         {
             addAndMakeVisible (headers.add (new Label (s, s)));
-            widths.add (1.0f / columnHeaders.size());
+            widths.add (1.0f / (float) columnHeaders.size());
         }
 
         setSize (200, 40);
@@ -83,7 +90,7 @@ public:
         auto index = 0;
         for (auto h : headers)
         {
-            auto headerWidth = roundToInt (width * widths.getUnchecked (index));
+            auto headerWidth = roundToInt ((float) width * widths.getUnchecked (index));
             h->setBounds (bounds.removeFromLeft (headerWidth));
             ++index;
         }
@@ -107,7 +114,7 @@ public:
         for (int i = 0; i < index; ++i)
             prop += widths.getUnchecked (i);
 
-        return roundToInt (prop * getWidth());
+        return roundToInt (prop * (float) getWidth());
     }
 
     float getProportionAtIndex (int index)
@@ -365,7 +372,7 @@ private:
         if (availableTextWidth == 0)
             return 0;
 
-        return static_cast<int> (nameWidth / availableTextWidth);
+        return static_cast<int> (nameWidth / (float) availableTextWidth);
     }
 
     //==============================================================================

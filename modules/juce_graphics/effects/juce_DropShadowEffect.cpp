@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -126,8 +133,8 @@ void DropShadow::drawForRectangle (Graphics& g, const Rectangle<int>& targetArea
     for (float i = 0.05f; i < 1.0f; i += 0.1f)
         cg.addColour (1.0 - i, colour.withMultipliedAlpha (i * i));
 
-    const float radiusInset = radius / 2.0f;
-    const float expandedRadius = radius + radiusInset;
+    const float radiusInset = (float) radius / 2.0f;
+    const float expandedRadius = (float) radius + radiusInset;
 
     auto area = targetArea.toFloat().reduced (radiusInset) + offset.toFloat();
 
@@ -162,10 +169,10 @@ void DropShadowEffect::setShadowProperties (const DropShadow& newShadow)
 void DropShadowEffect::applyEffect (Image& image, Graphics& g, float scaleFactor, float alpha)
 {
     DropShadow s (shadow);
-    s.radius = roundToInt (s.radius * scaleFactor);
+    s.radius = roundToInt ((float) s.radius * scaleFactor);
     s.colour = s.colour.withMultipliedAlpha (alpha);
-    s.offset.x = roundToInt (s.offset.x * scaleFactor);
-    s.offset.y = roundToInt (s.offset.y * scaleFactor);
+    s.offset.x = roundToInt ((float) s.offset.x * scaleFactor);
+    s.offset.y = roundToInt ((float) s.offset.y * scaleFactor);
 
     s.drawForImage (g, image);
 

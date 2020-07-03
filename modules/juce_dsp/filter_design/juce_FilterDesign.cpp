@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -38,7 +45,7 @@ typename FIR::Coefficients<FloatType>::Ptr
 
     for (size_t i = 0; i <= order; ++i)
     {
-        if (i == order * 0.5)
+        if (i == order / 2)
         {
             c[i] = static_cast<FloatType> (normalisedFrequency * 2);
         }
@@ -106,8 +113,8 @@ typename FIR::Coefficients<FloatType>::Ptr
         }
         else
         {
-            auto indice  = MathConstants<double>::pi * (i - 0.5 * order);
-            auto indice2 = MathConstants<double>::pi * normalisedTransitionWidth * (i - 0.5 * order) / spline;
+            auto indice  = MathConstants<double>::pi * ((double) i - 0.5 * (double) order);
+            auto indice2 = MathConstants<double>::pi * normalisedTransitionWidth * ((double) i - 0.5 * (double) order) / spline;
             c[i] = static_cast<FloatType> (std::sin (2 * indice * normalisedFrequency)
                                             / indice * std::pow (std::sin (indice2) / indice2, spline));
         }
@@ -153,12 +160,12 @@ typename FIR::Coefficients<FloatType>::Ptr
         auto factors = ws / MathConstants<double>::pi;
 
         for (size_t i = 0; i <= M; ++i)
-            b (i, 0) = factorp * sinc (factorp * i);
+            b (i, 0) = factorp * sinc (factorp * (double) i);
 
         q (0, 0) = factorp + stopBandWeight * (1.0 - factors);
 
         for (size_t i = 1; i <= 2 * M; ++i)
-            q (i, 0) = factorp * sinc (factorp * i) - stopBandWeight * factors * sinc (factors * i);
+            q (i, 0) = factorp * sinc (factorp * (double) i) - stopBandWeight * factors * sinc (factors * (double) i);
 
         auto Q1 = Matrix<double>::toeplitz (q, M + 1);
         auto Q2 = Matrix<double>::hankel (q, M + 1, 0);
@@ -191,12 +198,12 @@ typename FIR::Coefficients<FloatType>::Ptr
         auto factors = ws / MathConstants<double>::pi;
 
         for (size_t i = 0; i < M; ++i)
-            b (i, 0) = factorp * sinc (factorp * (i + 0.5));
+            b (i, 0) = factorp * sinc (factorp * ((double) i + 0.5));
 
         for (size_t i = 0; i < 2 * M; ++i)
         {
-            qp (i, 0) = 0.25 * factorp * sinc (factorp * i);
-            qs (i, 0) = -0.25 * stopBandWeight * factors * sinc (factors * i);
+            qp (i, 0) = 0.25 * factorp * sinc (factorp * (double) i);
+            qs (i, 0) = -0.25 * stopBandWeight * factors * sinc (factors * (double) i);
         }
 
         auto Q1p = Matrix<double>::toeplitz (qp, M);

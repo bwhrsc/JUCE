@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -73,13 +80,13 @@ private:
             Path wavePath;
 
             auto waveStep = 10.0f;
-            auto waveY = getHeight() * 0.44f;
+            auto waveY = (float) getHeight() * 0.44f;
             int i = 0;
 
-            for (auto x = waveStep * 0.5f; x < getWidth(); x += waveStep)
+            for (auto x = waveStep * 0.5f; x < (float) getWidth(); x += waveStep)
             {
-                auto y1 = waveY + getHeight() * 0.05f * std::sin (i * 0.38f + elapsed);
-                auto y2 = waveY + getHeight() * 0.10f * std::sin (i * 0.20f + elapsed * 2.0f);
+                auto y1 = waveY + (float) getHeight() * 0.05f * std::sin ((float) i * 0.38f + elapsed);
+                auto y2 = waveY + (float) getHeight() * 0.10f * std::sin ((float) i * 0.20f + elapsed * 2.0f);
 
                 wavePath.addLineSegment ({ x, y1, x, y2 }, 2.0f);
                 wavePath.addEllipse (x - waveStep * 0.3f, y1 - waveStep * 0.3f, waveStep * 0.6f, waveStep * 0.6f);

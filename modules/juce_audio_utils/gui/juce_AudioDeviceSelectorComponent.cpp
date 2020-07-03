@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -102,12 +109,12 @@ public:
             bool enabled = deviceManager.isMidiInputDeviceEnabled (item.identifier);
 
             auto x = getTickX();
-            auto tickW = height * 0.75f;
+            auto tickW = (float) height * 0.75f;
 
-            getLookAndFeel().drawTickBox (g, *this, x - tickW, (height - tickW) / 2, tickW, tickW,
+            getLookAndFeel().drawTickBox (g, *this, (float) x - tickW, ((float) height - tickW) * 0.5f, tickW, tickW,
                                           enabled, true, true, false);
 
-            g.setFont (height * 0.6f);
+            g.setFont ((float) height * 0.6f);
             g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
             g.drawText (item.name, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
         }
@@ -138,7 +145,7 @@ public:
         if (items.isEmpty())
         {
             g.setColour (Colours::grey);
-            g.setFont (0.5f * getRowHeight());
+            g.setFont (0.5f * (float) getRowHeight());
             g.drawText (noItemsMessage,
                         0, 0, getWidth(), getHeight() / 2,
                         Justification::centred, true);
@@ -793,12 +800,12 @@ public:
                 }
 
                 auto x = getTickX();
-                auto tickW = height * 0.75f;
+                auto tickW = (float) height * 0.75f;
 
-                getLookAndFeel().drawTickBox (g, *this, x - tickW, (height - tickW) / 2, tickW, tickW,
+                getLookAndFeel().drawTickBox (g, *this, (float) x - tickW, ((float) height - tickW) * 0.5f, tickW, tickW,
                                               enabled, true, true, false);
 
-                g.setFont (height * 0.6f);
+                g.setFont ((float) height * 0.6f);
                 g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
                 g.drawText (item, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
             }
@@ -829,7 +836,7 @@ public:
             if (items.isEmpty())
             {
                 g.setColour (Colours::grey);
-                g.setFont (0.5f * getRowHeight());
+                g.setFont (0.5f * (float) getRowHeight());
                 g.drawText (noItemsMessage,
                             0, 0, getWidth(), getHeight() / 2,
                             Justification::centred, true);

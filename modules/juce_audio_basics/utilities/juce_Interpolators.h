@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -19,6 +26,14 @@
 namespace juce
 {
 
+/**
+    A collection of different interpolators for resampling streams of floats.
+
+    @see GenericInterpolator, WindowedSincInterpolator, LagrangeInterpolator,
+         CatmullRomInterpolator, LinearInterpolator, ZeroOrderHoldInterpolator
+
+    @tags{Audio}
+*/
 class Interpolators
 {
 private:
@@ -39,7 +54,8 @@ private:
 
         static forcedinline float valueAtOffset (const float* const inputs, const float offset, int indexBuffer) noexcept
         {
-            int numCrossings = 100;
+            const int numCrossings = 100;
+            const float floatCrossings = (float) numCrossings;
             float result = 0.0f;
 
             auto samplePosition = indexBuffer;
@@ -54,14 +70,15 @@ private:
                 if (i == -numCrossings || (sincPosition >= 0 && lastSincPosition < 0))
                 {
                     auto indexFloat = (sincPosition >= 0.f ? sincPosition : -sincPosition) * 100.0f;
-                    index = (int) std::floor (indexFloat);
-                    firstFrac = indexFloat - index;
+                    auto indexFloored = std::floor (indexFloat);
+                    index = (int) indexFloored;
+                    firstFrac = indexFloat - indexFloored;
                     sign = (sincPosition < 0 ? -1 : 1);
                 }
 
                 if (sincPosition == 0.0f)
                     result += inputs[samplePosition];
-                else if (sincPosition < numCrossings && sincPosition > -numCrossings)
+                else if (sincPosition < floatCrossings && sincPosition > -floatCrossings)
                     result += inputs[samplePosition] * windowedSinc (firstFrac, index);
 
                 if (++samplePosition == numCrossings * 2)

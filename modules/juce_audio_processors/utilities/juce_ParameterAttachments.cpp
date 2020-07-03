@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -184,6 +191,7 @@ ComboBoxParameterAttachment::ComboBoxParameterAttachment (RangedAudioParameter& 
                                                           ComboBox& c,
                                                           UndoManager* um)
     : comboBox (c),
+      storedParameter (param),
       attachment (param, [this] (float f) { setValue (f); }, um)
 {
     sendInitialUpdate();
@@ -202,7 +210,8 @@ void ComboBoxParameterAttachment::sendInitialUpdate()
 
 void ComboBoxParameterAttachment::setValue (float newValue)
 {
-    const auto index = roundToInt (newValue);
+    const auto normValue = storedParameter.convertTo0to1 (newValue);
+    const auto index = roundToInt (normValue * (float) (comboBox.getNumItems() - 1));
 
     if (index == comboBox.getSelectedItemIndex())
         return;
@@ -216,7 +225,12 @@ void ComboBoxParameterAttachment::comboBoxChanged (ComboBox*)
     if (ignoreCallbacks)
         return;
 
-    attachment.setValueAsCompleteGesture ((float) comboBox.getSelectedItemIndex());
+    const auto numItems = comboBox.getNumItems();
+    const auto selected = (float) comboBox.getSelectedItemIndex();
+    const auto newValue = numItems > 1 ? selected / (float) (numItems - 1)
+                                       : 0.0f;
+
+    attachment.setValueAsCompleteGesture (storedParameter.convertFrom0to1 (newValue));
 }
 
 //==============================================================================

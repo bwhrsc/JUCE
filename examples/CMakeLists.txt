@@ -1,12 +1,19 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE 6 technical preview.
+#  This file is part of the JUCE library.
 #  Copyright (c) 2020 - Raw Material Software Limited
 #
-#  You may use this code under the terms of the GPL v3
-#  (see www.gnu.org/licenses).
+#  JUCE is an open source library subject to commercial or open-source
+#  licensing.
 #
-#  For this technical preview, this file is not subject to commercial licensing.
+#  By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+#  Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+#
+#  End User License Agreement: www.juce.com/juce-6-licence
+#  Privacy Policy: www.juce.com/juce-privacy-policy
+#
+#  Or: You may also use this code under the terms of the GPL v3 (see
+#  www.gnu.org/licenses).
 #
 #  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
 #  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -24,23 +31,19 @@ function(_juce_add_pips)
         CONFIGURE_DEPENDS LIST_DIRECTORIES false
         "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        list(REMOVE_ITEM headers
+            "${CMAKE_CURRENT_SOURCE_DIR}/CameraDemo.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/PushNotificationsDemo.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/VideoDemo.h")
+        endif()
+
     foreach(header IN ITEMS ${headers})
         juce_add_pip(${header} added_target)
-        target_link_libraries(${added_target} PRIVATE
+        target_link_libraries(${added_target} PUBLIC
             juce::juce_recommended_config_flags
             juce::juce_recommended_lto_flags
             juce::juce_recommended_warning_flags)
-
-        get_target_property(active_targets ${added_target} JUCE_ACTIVE_PLUGIN_TARGETS)
-
-        if(active_targets)
-            foreach(plugin_target IN LISTS active_targets)
-                target_link_libraries(${plugin_target} PRIVATE
-                    juce::juce_recommended_config_flags
-                    juce::juce_recommended_lto_flags
-                    juce::juce_recommended_warning_flags)
-            endforeach()
-        endif()
     endforeach()
 endfunction()
 

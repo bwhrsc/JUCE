@@ -1,13 +1,20 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE 6 technical preview.
+   This file is part of the JUCE library.
    Copyright (c) 2020 - Raw Material Software Limited
 
-   You may use this code under the terms of the GPL v3
-   (see www.gnu.org/licenses).
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   For this technical preview, this file is not subject to commercial licensing.
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
    JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
    EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
@@ -449,11 +456,22 @@ public:
 
         virtual ~Param() override = default;
 
-        void updateParameterInfo()
+        bool updateParameterInfo()
         {
-            toString128 (info.title,      param.getName (128));
-            toString128 (info.shortTitle, param.getName (8));
-            toString128 (info.units,      param.getLabel());
+            auto updateParamIfChanged = [] (Vst::String128& paramToUpdate, const String& newValue)
+            {
+                if (juce::toString (paramToUpdate) == newValue)
+                    return false;
+
+                toString128 (paramToUpdate, newValue);
+                return true;
+            };
+
+            auto anyUpdated = updateParamIfChanged (info.title,      param.getName (128));
+            anyUpdated     |= updateParamIfChanged (info.shortTitle, param.getName (8));
+            anyUpdated     |= updateParamIfChanged (info.units,      param.getLabel());
+
+            return anyUpdated;
         }
 
         bool setNormalized (Vst::ParamValue v) override
@@ -883,21 +901,42 @@ public:
 
     void audioProcessorChanged (AudioProcessor*) override
     {
-        auto numParameters = parameters.getParameterCount();
+        int32 flags = 0;
 
-        for (int32 i = 0; i < numParameters; ++i)
+        for (int32 i = 0; i < parameters.getParameterCount(); ++i)
             if (auto* param = dynamic_cast<Param*> (parameters.getParameterByIndex (i)))
-                param->updateParameterInfo();
+                if (param->updateParameterInfo() && (flags & Vst::kParamTitlesChanged) == 0)
+                    flags |= Vst::kParamTitlesChanged;
 
         if (auto* pluginInstance = getPluginInstance())
         {
-            if (pluginInstance->getNumPrograms() > 1)
-                EditController::setParamNormalized (JuceAudioProcessor::paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                                                                         / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1));
+            auto newNumPrograms = pluginInstance->getNumPrograms();
+
+            if (newNumPrograms != lastNumPrograms)
+            {
+                if (newNumPrograms > 1)
+                {
+                    auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
+                                      / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1);
+
+                    EditController::setParamNormalized (JuceAudioProcessor::paramPreset, paramValue);
+                    flags |= Vst::kParamValuesChanged;
+                }
+
+                lastNumPrograms = newNumPrograms;
+            }
+
+            auto newLatencySamples = pluginInstance->getLatencySamples();
+
+            if (newLatencySamples != lastLatencySamples)
+            {
+                flags |= Vst::kLatencyChanged;
+                lastLatencySamples = newLatencySamples;
+            }
         }
 
-        if (componentHandler != nullptr && ! inSetupProcessing)
-            componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged | Vst::kParamTitlesChanged);
+        if (flags != 0 && componentHandler != nullptr && ! inSetupProcessing)
+            componentHandler->restartComponent (flags);
     }
 
     void parameterValueChanged (int, float newValue) override
@@ -942,6 +981,8 @@ private:
     //==============================================================================
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
+
+    int lastNumPrograms = 0, lastLatencySamples = 0;
 
    #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
@@ -1221,10 +1262,10 @@ private:
 
                         auto transformScale = std::sqrt (std::abs (editor->getTransform().getDeterminant()));
 
-                        auto minW = (double) (constrainer->getMinimumWidth()  * transformScale);
-                        auto maxW = (double) (constrainer->getMaximumWidth()  * transformScale);
-                        auto minH = (double) (constrainer->getMinimumHeight() * transformScale);
-                        auto maxH = (double) (constrainer->getMaximumHeight() * transformScale);
+                        auto minW = (double) ((float) constrainer->getMinimumWidth()  * transformScale);
+                        auto maxW = (double) ((float) constrainer->getMaximumWidth()  * transformScale);
+                        auto minH = (double) ((float) constrainer->getMinimumHeight() * transformScale);
+                        auto maxH = (double) ((float) constrainer->getMaximumHeight() * transformScale);
 
                         auto width  = (double) (rectToCheck->right - rectToCheck->left);
                         auto height = (double) (rectToCheck->bottom - rectToCheck->top);
@@ -1340,10 +1381,10 @@ private:
             if (approximatelyEqual (desktopScale, 1.0f))
                 return pluginRect;
 
-            return { roundToInt (pluginRect.left   * desktopScale),
-                     roundToInt (pluginRect.top    * desktopScale),
-                     roundToInt (pluginRect.right  * desktopScale),
-                     roundToInt (pluginRect.bottom * desktopScale) };
+            return { roundToInt ((float) pluginRect.left   * desktopScale),
+                     roundToInt ((float) pluginRect.top    * desktopScale),
+                     roundToInt ((float) pluginRect.right  * desktopScale),
+                     roundToInt ((float) pluginRect.bottom * desktopScale) };
         }
 
         static ViewRect convertFromHostBounds (ViewRect hostRect)
@@ -1353,10 +1394,10 @@ private:
             if (approximatelyEqual (desktopScale, 1.0f))
                 return hostRect;
 
-            return { roundToInt (hostRect.left   / desktopScale),
-                     roundToInt (hostRect.top    / desktopScale),
-                     roundToInt (hostRect.right  / desktopScale),
-                     roundToInt (hostRect.bottom / desktopScale) };
+            return { roundToInt ((float) hostRect.left   / desktopScale),
+                     roundToInt ((float) hostRect.top    / desktopScale),
+                     roundToInt ((float) hostRect.right  / desktopScale),
+                     roundToInt ((float) hostRect.bottom / desktopScale) };
         }
 
         //==============================================================================
@@ -2240,11 +2281,15 @@ public:
 
         if (type == Vst::kEvent)
         {
+           #if JucePlugin_WantsMidiInput
             if (dir == Vst::kInput)
-                return isMidiInputBusEnabled ? 1 : 0;
+                return 1;
+           #endif
 
+           #if JucePlugin_ProducesMidiOutput
             if (dir == Vst::kOutput)
-                return isMidiOutputBusEnabled ? 1 : 0;
+                return 1;
+           #endif
         }
 
         return 0;
@@ -2325,15 +2370,23 @@ public:
     {
         if (type == Vst::kEvent)
         {
-            if (index != 0)
-                return kResultFalse;
-
-            if (dir == Vst::kInput)
+           #if JucePlugin_WantsMidiInput
+            if (index == 0 && dir == Vst::kInput)
+            {
                 isMidiInputBusEnabled = (state != 0);
-            else
-                isMidiOutputBusEnabled = (state != 0);
+                return kResultTrue;
+            }
+           #endif
 
-            return kResultTrue;
+           #if JucePlugin_ProducesMidiOutput
+            if (index == 0 && dir == Vst::kOutput)
+            {
+                isMidiOutputBusEnabled = (state != 0);
+                return kResultTrue;
+            }
+           #endif
+
+            return kResultFalse;
         }
 
         if (type == Vst::kAudio)
@@ -2577,7 +2630,7 @@ public:
             processParameterChanges (*data.inputParameterChanges);
 
        #if JucePlugin_WantsMidiInput
-        if (data.inputEvents != nullptr)
+        if (isMidiInputBusEnabled && data.inputEvents != nullptr)
             MidiEventList::toMidiBuffer (midiBuffer, *data.inputEvents);
        #endif
 
@@ -2596,7 +2649,7 @@ public:
         else jassertfalse;
 
        #if JucePlugin_ProducesMidiOutput
-        if (data.outputEvents != nullptr)
+        if (isMidiOutputBusEnabled && data.outputEvents != nullptr)
             MidiEventList::toEventList (*data.outputEvents, midiBuffer);
        #endif
 
@@ -2873,15 +2926,10 @@ private:
     AudioBuffer<double> emptyBufferDouble;
 
    #if JucePlugin_WantsMidiInput
-    bool isMidiInputBusEnabled = true;
-   #else
-    bool isMidiInputBusEnabled = false;
+    std::atomic<bool> isMidiInputBusEnabled { true };
    #endif
-
    #if JucePlugin_ProducesMidiOutput
-    bool isMidiOutputBusEnabled = true;
-   #else
-    bool isMidiOutputBusEnabled = false;
+    std::atomic<bool> isMidiOutputBusEnabled { true };
    #endif
 
     static const char* kJucePrivateDataIdentifier;
@@ -3263,10 +3311,10 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
 {
     PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST3;
 
-   #if JUCE_MSVC
+   #if JUCE_MSVC || (JUCE_WINDOWS && JUCE_CLANG)
     // Cunning trick to force this function to be exported. Life's too short to
     // faff around creating .def files for this kind of thing.
-    #pragma comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)
+    #pragma comment(linker, "/EXPORT:GetPluginFactory=GetPluginFactory")
    #endif
 
     if (globalFactory == nullptr)
@@ -3306,7 +3354,7 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
 }
 
 //==============================================================================
-#if _MSC_VER || JUCE_MINGW
+#if JUCE_WINDOWS
 extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID) { if (reason == DLL_PROCESS_ATTACH) Process::setCurrentModuleInstanceHandle (instance); return true; }
 #endif
 
