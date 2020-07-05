@@ -121,12 +121,9 @@ public:
     */
     int getMidiChannelsToDisplay() const noexcept                   { return midiInChannelMask; }
     
-    /** If it isn't already a listener, registers the keyboard as a listener of the midi keyboard state. */
-    void startListeningToMidiKeyboardState();
+    /** Sets whether the keyboard should listen to the midi keyboard state. */
+    void shouldListenToMidiKeyboardState (bool shouldListen);
     
-    /** Deregisters the keyboard as a listener of the midi keyboard state. */
-    void stopListeningToMidiKeyboardState();
-
     //==============================================================================
     /** Changes the width used to draw the white keys. */
     void setKeyWidth (float widthInPixels);

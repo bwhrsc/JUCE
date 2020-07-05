@@ -204,14 +204,12 @@ void MidiKeyboardComponent::setVelocity (float v, bool useMousePosition)
     useMousePositionForVelocity = useMousePosition;
 }
 
-void MidiKeyboardComponent::startListeningToMidiKeyboardState()
+void MidiKeyboardComponent::shouldListenToMidiKeyboardState (bool shouldListen)
 {
-    state.addListener (this);
-}
-
-void MidiKeyboardComponent::stopListeningToMidiKeyboardState()
-{
-    state.removeListener (this);
+    if (shouldListen)
+        state.addListener (this);
+    else
+        state.removeListener (this);
 }
 
 //==============================================================================
