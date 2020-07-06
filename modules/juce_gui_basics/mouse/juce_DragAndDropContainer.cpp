@@ -83,7 +83,9 @@ public:
             g.fillAll (Colours::white);
 
         g.setOpacity (1.0f);
-        g.drawImageAt (image, 0, 0);
+    
+        auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (getScreenBounds()).scale;
+        g.drawImageTransformed (image, AffineTransform::scale (1.0f / (float) scale));
     }
 
     void mouseUp (const MouseEvent& e) override
