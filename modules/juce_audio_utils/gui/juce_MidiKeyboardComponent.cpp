@@ -204,6 +204,14 @@ void MidiKeyboardComponent::setVelocity (float v, bool useMousePosition)
     useMousePositionForVelocity = useMousePosition;
 }
 
+void MidiKeyboardComponent::shouldListenToMidiKeyboardState (bool shouldListen)
+{
+    if (shouldListen)
+        state.addListener (this);
+    else
+        state.removeListener (this);
+}
+
 //==============================================================================
 Range<float> MidiKeyboardComponent::getKeyPosition (int midiNoteNumber, float targetKeyWidth) const
 {
@@ -285,7 +293,7 @@ int MidiKeyboardComponent::getNoteAtPosition (Point<float> p)
 
 int MidiKeyboardComponent::xyToNote (Point<float> pos, float& mousePositionVelocity)
 {
-    if (! reallyContains (pos.toInt(), false))
+    if (! reallyContains (pos.roundToInt(), false))
         return -1;
 
     auto p = pos;

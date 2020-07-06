@@ -103,6 +103,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
             case ParentCursor:          c = [NSCursor arrowCursor]; break;
             case NoCursor:              return CustomMouseCursorInfo (Image (Image::ARGB, 8, 8, true), {}).create();
             case DraggingHandCursor:    c = [NSCursor openHandCursor]; break;
+            case ClosedHandCursor:      c = [NSCursor closedHandCursor]; break;
             case WaitCursor:            c = [NSCursor arrowCursor]; break; // avoid this on the mac, let the OS provide the beachball
             case IBeamCursor:           c = [NSCursor IBeamCursor]; break;
             case PointingHandCursor:    c = [NSCursor pointingHandCursor]; break;

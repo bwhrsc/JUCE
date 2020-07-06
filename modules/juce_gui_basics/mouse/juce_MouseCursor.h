@@ -55,6 +55,7 @@ public:
 
         PointingHandCursor,             /**< A hand with a pointing finger, for clicking on web-links. */
         DraggingHandCursor,             /**< An open flat hand for dragging heavy objects around. */
+        ClosedHandCursor,               /**< A closed hand for dragging heavy objects around. */
 
         LeftRightResizeCursor,          /**< An arrow pointing left and right. */
         UpDownResizeCursor,             /**< an arrow pointing up and down. */

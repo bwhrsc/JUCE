@@ -506,6 +506,11 @@ int Viewport::getScrollBarThickness() const
     return scrollBarThickness;
 }
 
+void Viewport::setScrollShouldBeReversed (bool scrollShouldBeReversed)
+{
+    scrollIsReversed = scrollShouldBeReversed;
+}
+
 void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
     auto newRangeStartInt = roundToInt (newRangeStart);
@@ -522,8 +527,13 @@ void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRange
 
 void Viewport::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! useMouseWheelMoveIfNeeded (e, wheel))
-        Component::mouseWheelMove (e, wheel);
+    auto newWheel = wheel;
+    
+    if (scrollIsReversed)
+        newWheel.isReversed = ! wheel.isReversed;
+    
+    if (! useMouseWheelMoveIfNeeded (e, newWheel))
+        Component::mouseWheelMove (e, newWheel);
 }
 
 static int rescaleMouseWheelDistance (float distance, int singleStepSize) noexcept
